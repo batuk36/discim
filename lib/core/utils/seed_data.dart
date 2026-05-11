@@ -1,0 +1,157 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+
+Future<void> seedClinics() async {
+  final db = FirebaseFirestore.instance;
+
+  final clinics = [
+    {
+      'name': 'Ankara Diş Merkezi',
+      'description': '15 yıllık deneyimle implant, ortodonti ve estetik diş tedavileri sunuyoruz. Modern ekipmanlarımız ve uzman kadromuzla hizmetinizdeyiz.',
+      'address': 'Kızılay, Çankaya, Ankara',
+      'phone': '0312 418 55 66',
+      'email': 'info@ankaradismerkezi.com',
+      'lat': 39.9208,
+      'lng': 32.8541,
+      'rating': 4.8,
+      'reviewCount': 142,
+      'isVerified': true,
+      'subscriptionStatus': 'active',
+      'ownerId': 'test1',
+      'photos': [],
+      'treatments': [
+        {'name': 'İmplant', 'priceRange': '8.000 - 15.000 ₺'},
+        {'name': 'Ortodonti', 'priceRange': '12.000 - 25.000 ₺'},
+        {'name': 'Estetik Diş', 'priceRange': '3.000 - 8.000 ₺'},
+        {'name': 'Kanal Tedavisi', 'priceRange': '2.000 - 4.000 ₺'},
+      ],
+      'workingHours': {
+        'Pazartesi': '09:00 - 18:00',
+        'Salı': '09:00 - 18:00',
+        'Çarşamba': '09:00 - 18:00',
+        'Perşembe': '09:00 - 18:00',
+        'Cuma': '09:00 - 17:00',
+      },
+    },
+    {
+      'name': 'Dr. Ayşe Kaya Kliniği',
+      'description': 'Çocuk diş hekimliği ve genel diş tedavilerinde uzmanlaşmış kliniğimiz, sizi gülümseten çözümler sunar.',
+      'address': 'Bahçelievler, Çankaya, Ankara',
+      'phone': '0312 212 33 44',
+      'email': 'drayse@kayaklinigi.com',
+      'lat': 39.9025,
+      'lng': 32.8345,
+      'rating': 4.6,
+      'reviewCount': 89,
+      'isVerified': true,
+      'subscriptionStatus': 'active',
+      'ownerId': 'test2',
+      'photos': [],
+      'treatments': [
+        {'name': 'Çocuk Diş', 'priceRange': '500 - 2.000 ₺'},
+        {'name': 'Dolgu', 'priceRange': '800 - 2.500 ₺'},
+        {'name': 'Diş Temizliği', 'priceRange': '600 - 1.200 ₺'},
+        {'name': 'Protez', 'priceRange': '5.000 - 12.000 ₺'},
+      ],
+      'workingHours': {
+        'Pazartesi': '08:30 - 17:30',
+        'Salı': '08:30 - 17:30',
+        'Çarşamba': '08:30 - 17:30',
+        'Perşembe': '08:30 - 17:30',
+        'Cuma': '08:30 - 16:00',
+      },
+    },
+    {
+      'name': 'Smile Dental Clinic',
+      'description': 'Zirkonyum, laminat ve porselen kaplama konusunda uzman kadromuzla estetik gülüş tasarımı yapıyoruz.',
+      'address': 'Tunalı Hilmi, Çankaya, Ankara',
+      'phone': '0312 467 88 99',
+      'email': 'info@smiledentalankara.com',
+      'lat': 39.9150,
+      'lng': 32.8620,
+      'rating': 4.9,
+      'reviewCount': 215,
+      'isVerified': true,
+      'subscriptionStatus': 'active',
+      'ownerId': 'test3',
+      'photos': [],
+      'treatments': [
+        {'name': 'Zirkonyum', 'priceRange': '4.000 - 7.000 ₺'},
+        {'name': 'Laminat', 'priceRange': '3.500 - 6.000 ₺'},
+        {'name': 'Gülüş Tasarımı', 'priceRange': '15.000 - 40.000 ₺'},
+        {'name': 'Beyazlatma', 'priceRange': '2.000 - 4.000 ₺'},
+      ],
+      'workingHours': {
+        'Pazartesi': '09:00 - 19:00',
+        'Salı': '09:00 - 19:00',
+        'Çarşamba': '09:00 - 19:00',
+        'Perşembe': '09:00 - 19:00',
+        'Cuma': '09:00 - 18:00',
+        'Cumartesi': '10:00 - 15:00',
+      },
+    },
+    {
+      'name': 'Dr. Emre Demir Ağız Sağlığı',
+      'description': 'Acil diş tedavisi dahil tüm diş sağlığı hizmetlerini uygun fiyatlarla sunuyoruz. 7/24 acil hat.',
+      'address': 'Ulus, Altındağ, Ankara',
+      'phone': '0312 309 11 22',
+      'email': 'dremre@demirdis.com',
+      'lat': 39.9410,
+      'lng': 32.8510,
+      'rating': 4.3,
+      'reviewCount': 56,
+      'isVerified': false,
+      'subscriptionStatus': 'active',
+      'ownerId': 'test4',
+      'photos': [],
+      'treatments': [
+        {'name': 'Acil Tedavi', 'priceRange': '500 - 3.000 ₺'},
+        {'name': 'Çekim', 'priceRange': '400 - 1.500 ₺'},
+        {'name': 'Kanal Tedavisi', 'priceRange': '1.800 - 3.500 ₺'},
+        {'name': 'Dolgu', 'priceRange': '700 - 2.000 ₺'},
+      ],
+      'workingHours': {
+        'Pazartesi': '08:00 - 20:00',
+        'Salı': '08:00 - 20:00',
+        'Çarşamba': '08:00 - 20:00',
+        'Perşembe': '08:00 - 20:00',
+        'Cuma': '08:00 - 20:00',
+        'Cumartesi': '09:00 - 17:00',
+      },
+    },
+    {
+      'name': 'Elit Diş Polikliniği',
+      'description': 'Dijital diş hekimliği teknolojileriyle 3D tarama, CAD/CAM sistemleri kullanarak en hassas tedavileri sunuyoruz.',
+      'address': 'Dikmen, Çankaya, Ankara',
+      'phone': '0312 478 22 33',
+      'email': 'info@elitdis.com',
+      'lat': 39.8950,
+      'lng': 32.8700,
+      'rating': 4.7,
+      'reviewCount': 178,
+      'isVerified': true,
+      'subscriptionStatus': 'active',
+      'ownerId': 'test5',
+      'photos': [],
+      'treatments': [
+        {'name': 'İmplant', 'priceRange': '10.000 - 18.000 ₺'},
+        {'name': 'Ortodonti', 'priceRange': '15.000 - 30.000 ₺'},
+        {'name': 'Protez', 'priceRange': '6.000 - 15.000 ₺'},
+        {'name': 'Estetik Diş', 'priceRange': '4.000 - 10.000 ₺'},
+      ],
+      'workingHours': {
+        'Pazartesi': '09:00 - 18:00',
+        'Salı': '09:00 - 18:00',
+        'Çarşamba': '09:00 - 18:00',
+        'Perşembe': '09:00 - 18:00',
+        'Cuma': '09:00 - 17:00',
+      },
+    },
+  ];
+
+  final batch = db.batch();
+  for (final clinic in clinics) {
+    final ref = db.collection('clinics').doc();
+    batch.set(ref, clinic);
+  }
+  await batch.commit();
+}

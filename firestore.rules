@@ -1,0 +1,107 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Yardımcı fonksiyonlar
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(uid) {
+      return request.auth.uid == uid;
+    }
+
+    function isClinicOwner(clinicId) {
+      return isSignedIn() &&
+        exists(/databases/$(database)/documents/clinics/$(clinicId)) &&
+        get(/databases/$(database)/documents/clinics/$(clinicId)).data.ownerId == request.auth.uid;
+    }
+
+    // Kullanıcılar
+    match /users/{userId} {
+      allow read: if isSignedIn();
+      allow create: if isOwner(userId);
+      allow update: if isOwner(userId);
+      allow delete: if false;
+
+      // Favoriler
+      match /favorites/{clinicId} {
+        allow read, write: if isOwner(userId);
+      }
+
+      // Kullanıcı bildirimleri
+      match /notifications/{notifId} {
+        allow read, update: if isOwner(userId);
+        allow create: if isSignedIn();
+        allow delete: if isOwner(userId);
+      }
+    }
+
+    // Klinikler
+    match /clinics/{clinicId} {
+      allow read: if true; // Herkes okuyabilir (arama için)
+      allow create: if isSignedIn();
+      allow update: if isClinicOwner(clinicId);
+      allow delete: if false;
+
+      // Klinik bildirimleri
+      match /notifications/{notifId} {
+        allow read, update: if isClinicOwner(clinicId);
+        allow create: if isSignedIn();
+        allow delete: if isClinicOwner(clinicId);
+      }
+
+      // Yorumlar
+      match /reviews/{reviewId} {
+        allow read: if true;
+        allow create: if isSignedIn() &&
+          request.auth.uid == request.resource.data.userId &&
+          // Çift yorum engeli — aynı kullanıcı aynı kliniğe ikinci yorum yapamaz
+          !exists(/databases/$(database)/documents/clinics/$(clinicId)/reviews/$(request.auth.uid));
+        allow update: if isSignedIn() && request.auth.uid == resource.data.userId;
+        allow delete: if false;
+      }
+    }
+
+    // Randevular
+    match /appointments/{appointmentId} {
+      allow read: if isSignedIn() && (
+        request.auth.uid == resource.data.userId ||
+        isClinicOwner(resource.data.clinicId)
+      );
+      allow create: if isSignedIn() &&
+        request.auth.uid == request.resource.data.userId;
+      allow update: if isSignedIn() && (
+        request.auth.uid == resource.data.userId ||
+        isClinicOwner(resource.data.clinicId)
+      );
+      allow delete: if false;
+    }
+
+    // Sohbetler
+    match /chats/{chatId} {
+      allow read: if isSignedIn() && (
+        request.auth.uid == resource.data.userId ||
+        isClinicOwner(resource.data.clinicId)
+      );
+      allow create: if isSignedIn() &&
+        request.auth.uid == request.resource.data.userId;
+      allow update: if isSignedIn() && (
+        request.auth.uid == resource.data.userId ||
+        isClinicOwner(resource.data.clinicId)
+      );
+      allow delete: if false;
+
+      // Mesajlar
+      match /messages/{messageId} {
+        allow read: if isSignedIn() && (
+          request.auth.uid == get(/databases/$(database)/documents/chats/$(chatId)).data.userId ||
+          isClinicOwner(get(/databases/$(database)/documents/chats/$(chatId)).data.clinicId)
+        );
+        allow create: if isSignedIn() &&
+          request.auth.uid == request.resource.data.senderId;
+        allow update, delete: if false;
+      }
+    }
+  }
+}

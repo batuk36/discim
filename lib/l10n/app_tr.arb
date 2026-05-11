@@ -1,0 +1,321 @@
+{
+  "@@locale": "tr",
+
+  "appName": "Dişçim",
+  "@appName": { "description": "App name" },
+
+  "tagline": "En iyi dişçini bul",
+  "@tagline": {},
+
+  "welcome": "Hoş geldin,",
+  "@welcome": {},
+
+  "heroTitle": "Dişçini bul,\nrandevunu al.",
+  "@heroTitle": {},
+
+  "searchHint": "Dişçi, klinik veya tedavi ara...",
+  "@searchHint": {},
+
+  "nearbyClinicsSectionTitle": "Yakınımdaki Klinikler",
+  "@nearbyClinicsSectionTitle": {},
+
+  "seeAll": "Tümünü gör",
+  "@seeAll": {},
+
+  "filterAll": "Tümü",
+  "@filterAll": {},
+
+  "filterOpenNow": "Şimdi Açık",
+  "@filterOpenNow": {},
+
+  "quickActionEmergency": "Acil",
+  "@quickActionEmergency": {},
+
+  "quickActionNearby": "Yakınımda",
+  "@quickActionNearby": {},
+
+  "quickActionPrice": "Fiyat",
+  "@quickActionPrice": {},
+
+  "quickActionFavorites": "Favoriler",
+  "@quickActionFavorites": {},
+
+  "noClinicsFound": "Klinik bulunamadı",
+  "@noClinicsFound": {},
+
+  "login": "Giriş Yap",
+  "@login": {},
+
+  "loginTitle": "Giriş Yap",
+  "@loginTitle": {},
+
+  "loginSubtitle": "Hesabına giriş yap",
+  "@loginSubtitle": {},
+
+  "email": "E-posta",
+  "@email": {},
+
+  "password": "Şifre",
+  "@password": {},
+
+  "emailRequired": "E-posta gerekli",
+  "@emailRequired": {},
+
+  "passwordMinLength": "Şifre en az 6 karakter",
+  "@passwordMinLength": {},
+
+  "noAccount": "Hesabın yok mu?",
+  "@noAccount": {},
+
+  "register": "Kayıt Ol",
+  "@register": {},
+
+  "isDentist": "Dişçi misin? Kliniğini kaydet",
+  "@isDentist": {},
+
+  "registerTitle": "Kayıt Ol",
+  "@registerTitle": {},
+
+  "registerSubtitle": "Yeni hesap oluştur",
+  "@registerSubtitle": {},
+
+  "fullName": "Ad Soyad",
+  "@fullName": {},
+
+  "nameRequired": "Ad Soyad gerekli",
+  "@nameRequired": {},
+
+  "phone": "Telefon",
+  "@phone": {},
+
+  "passwordConfirm": "Şifre Tekrar",
+  "@passwordConfirm": {},
+
+  "passwordMismatch": "Şifreler eşleşmiyor",
+  "@passwordMismatch": {},
+
+  "alreadyHaveAccount": "Zaten hesabın var mı?",
+  "@alreadyHaveAccount": {},
+
+  "myAppointments": "Randevularım",
+  "@myAppointments": {},
+
+  "messages": "Mesajlar",
+  "@messages": {},
+
+  "profile": "Profil",
+  "@profile": {},
+
+  "appointments": "Randevular",
+  "@appointments": {},
+
+  "notifications": "Bildirimler",
+  "@notifications": {},
+
+  "favorites": "Favorilerim",
+  "@favorites": {},
+
+  "priceComparison": "Fiyat Karşılaştırma",
+  "@priceComparison": {},
+
+  "selectTreatment": "Tedavi seç",
+  "@selectTreatment": {},
+
+  "mostAffordable": "En uygun",
+  "@mostAffordable": {},
+
+  "notSpecified": "Belirtilmemiş",
+  "@notSpecified": {},
+
+  "noPriceFound": "Bu tedavi için fiyat bulunamadı",
+  "@noPriceFound": {},
+
+  "bookAppointment": "Randevu Al",
+  "@bookAppointment": {},
+
+  "sendMessage": "Mesaj Gönder",
+  "@sendMessage": {},
+
+  "writeReview": "Yorum Yaz",
+  "@writeReview": {},
+
+  "addToFavorites": "Favorilere ekle",
+  "@addToFavorites": {},
+
+  "verified": "Doğrulanmış",
+  "@verified": {},
+
+  "treatments": "Tedaviler",
+  "@treatments": {},
+
+  "workingHours": "Çalışma Saatleri",
+  "@workingHours": {},
+
+  "reviews": "Yorumlar",
+  "@reviews": {},
+
+  "noReviews": "Henüz yorum yok",
+  "@noReviews": {},
+
+  "closed": "Kapalı",
+  "@closed": {},
+
+  "cancel": "İptal",
+  "@cancel": {},
+
+  "confirm": "Onayla",
+  "@confirm": {},
+
+  "cancelAppointment": "Randevuyu İptal Et",
+  "@cancelAppointment": {},
+
+  "cancelConfirmTitle": "Randevuyu iptal et",
+  "@cancelConfirmTitle": {},
+
+  "cancelConfirmBody": "Bu randevuyu iptal etmek istediğinizden emin misiniz?",
+  "@cancelConfirmBody": {},
+
+  "appointmentCancelled": "Randevu iptal edildi",
+  "@appointmentCancelled": {},
+
+  "noAppointments": "Henüz randevunuz yok",
+  "@noAppointments": {},
+
+  "statusPending": "Bekliyor",
+  "@statusPending": {},
+
+  "statusConfirmed": "Onaylandı",
+  "@statusConfirmed": {},
+
+  "statusCancelled": "İptal Edildi",
+  "@statusCancelled": {},
+
+  "selectDate": "Tarih Seçin",
+  "@selectDate": {},
+
+  "selectTime": "Saat Seçin",
+  "@selectTime": {},
+
+  "selectTreatmentType": "Tedavi Türü",
+  "@selectTreatmentType": {},
+
+  "appointmentBooked": "Randevunuz oluşturuldu!",
+  "@appointmentBooked": {},
+
+  "noMessages": "Henüz mesajınız yok",
+  "@noMessages": {},
+
+  "typeMessage": "Mesaj yazın...",
+  "@typeMessage": {},
+
+  "noNotifications": "Bildirim yok",
+  "@noNotifications": {},
+
+  "markAllRead": "Tümünü oku",
+  "@markAllRead": {},
+
+  "editProfile": "Profili Düzenle",
+  "@editProfile": {},
+
+  "save": "Kaydet",
+  "@save": {},
+
+  "logout": "Çıkış Yap",
+  "@logout": {},
+
+  "logoutConfirm": "Çıkış yapmak istediğinizden emin misiniz?",
+  "@logoutConfirm": {},
+
+  "help": "Yardım",
+  "@help": {},
+
+  "notificationSettings": "Bildirimler",
+  "@notificationSettings": {},
+
+  "dentistPanel": "Dişçi Paneli",
+  "@dentistPanel": {},
+
+  "todaySummary": "Bugünün Özeti",
+  "@todaySummary": {},
+
+  "pendingCount": "Bekleyen",
+  "@pendingCount": {},
+
+  "confirmedCount": "Onaylı",
+  "@confirmedCount": {},
+
+  "totalCount": "Toplam",
+  "@totalCount": {},
+
+  "quickAccess": "Hızlı Erişim",
+  "@quickAccess": {},
+
+  "statistics": "İstatistikler",
+  "@statistics": {},
+
+  "myClinic": "Profilim",
+  "@myClinic": {},
+
+  "noClinicFound": "Klinik bulunamadı",
+  "@noClinicFound": {},
+
+  "noAppointmentsYet": "Henüz randevu yok",
+  "@noAppointmentsYet": {},
+
+  "appointmentConfirmed": "Randevunuz onaylandı ✓",
+  "@appointmentConfirmed": {},
+
+  "appointmentCancelledNotif": "Randevunuz iptal edildi",
+  "@appointmentCancelledNotif": {},
+
+  "reviewNeedConfirmedAppointment": "Yorum yapabilmek için onaylı randevunuz olması gerekiyor.",
+  "@reviewNeedConfirmedAppointment": {},
+
+  "ratingLabel": "Puanınız",
+  "@ratingLabel": {},
+
+  "commentLabel": "Yorumunuz",
+  "@commentLabel": {},
+
+  "commentHint": "Kliniği değerlendirin...",
+  "@commentHint": {},
+
+  "submit": "Gönder",
+  "@submit": {},
+
+  "reviewAdded": "Yorumunuz eklendi",
+  "@reviewAdded": {},
+
+  "noFavorites": "Henüz favori kliniğiniz yok",
+  "@noFavorites": {},
+
+  "dentistRegisterTitle": "Kliniğini Kaydet",
+  "@dentistRegisterTitle": {},
+
+  "dentistRegisterSubtitle": "Dişçi hesabı oluştur",
+  "@dentistRegisterSubtitle": {},
+
+  "clinicName": "Klinik Adı",
+  "@clinicName": {},
+
+  "clinicAddress": "Adres",
+  "@clinicAddress": {},
+
+  "clinicDescription": "Açıklama",
+  "@clinicDescription": {},
+
+  "monday": "Pazartesi",
+  "@monday": {},
+  "tuesday": "Salı",
+  "@tuesday": {},
+  "wednesday": "Çarşamba",
+  "@wednesday": {},
+  "thursday": "Perşembe",
+  "@thursday": {},
+  "friday": "Cuma",
+  "@friday": {},
+  "saturday": "Cumartesi",
+  "@saturday": {},
+  "sunday": "Pazar",
+  "@sunday": {}
+}
