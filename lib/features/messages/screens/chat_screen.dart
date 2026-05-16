@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../../core/constants/app_colors.dart';
@@ -56,6 +57,11 @@ class _ChatScreenState extends State<ChatScreen> {
   Future<void> _send() async {
     final text = _ctrl.text.trim();
     if (text.isEmpty) return;
+    final conn = await Connectivity().checkConnectivity();
+    if (conn.every((r) => r == ConnectivityResult.none)) {
+      if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('İnternet bağlantınız yok')));
+      return;
+    }
     final uid = context.read<AuthProvider>().firebaseUser!.uid;
     _ctrl.clear();
 

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
@@ -81,6 +82,11 @@ class _AppointmentScreenState extends State<AppointmentScreen> {
     if (_selectedTime == null) {
       ScaffoldMessenger.of(context)
           .showSnackBar(const SnackBar(content: Text('Lütfen saat seçin')));
+      return;
+    }
+    final conn = await Connectivity().checkConnectivity();
+    if (conn.every((r) => r == ConnectivityResult.none)) {
+      if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('İnternet bağlantınız yok')));
       return;
     }
     setState(() => _loading = true);

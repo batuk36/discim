@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:image_cropper/image_cropper.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../models/clinic_model.dart';
 
@@ -25,8 +26,8 @@ class _DentistEditProfileScreenState extends State<DentistEditProfileScreen> {
   late Map<String, _HoursEntry> _hours;
   late List<String> _existingPhotos;
   final List<File> _newPhotos = [];
-  File? _logoFile;
-  String? _logoUrl;
+  File? _dentistPhotoFile;
+  String? _dentistPhotoUrl;
 
   bool _loading = false;
 
@@ -42,7 +43,7 @@ class _DentistEditProfileScreenState extends State<DentistEditProfileScreen> {
     _addressCtrl = TextEditingController(text: c.address);
     _phoneCtrl = TextEditingController(text: c.phone);
     _existingPhotos = List<String>.from(c.photos);
-    _logoUrl = c.logoUrl;
+    _dentistPhotoUrl = c.dentistPhotoUrl;
     _treatments = c.treatments.map((t) => _TreatmentEntry(
       nameCtrl: TextEditingController(text: t.name),
       priceCtrl: TextEditingController(text: t.priceRange),
@@ -70,10 +71,24 @@ class _DentistEditProfileScreenState extends State<DentistEditProfileScreen> {
     super.dispose();
   }
 
-  Future<void> _pickLogo() async {
+  Future<void> _pickDentistPhoto() async {
     final picker = ImagePicker();
-    final picked = await picker.pickImage(source: ImageSource.gallery, imageQuality: 80, maxWidth: 512);
-    if (picked != null) setState(() => _logoFile = File(picked.path));
+    final picked = await picker.pickImage(source: ImageSource.gallery, imageQuality: 90, maxWidth: 1024);
+    if (picked == null) return;
+    final cropped = await ImageCropper().cropImage(
+      sourcePath: picked.path,
+      aspectRatio: const CropAspectRatio(ratioX: 1, ratioY: 1),
+      uiSettings: [
+        AndroidUiSettings(
+          toolbarTitle: 'Fotoğrafı Kırp',
+          toolbarColor: AppColors.primary,
+          toolbarWidgetColor: Colors.white,
+          initAspectRatio: CropAspectRatioPreset.square,
+          lockAspectRatio: true,
+        ),
+      ],
+    );
+    if (cropped != null) setState(() => _dentistPhotoFile = File(cropped.path));
   }
 
   Future<void> _pickPhotos() async {
@@ -87,17 +102,18 @@ class _DentistEditProfileScreenState extends State<DentistEditProfileScreen> {
   Future<void> _save() async {
     setState(() => _loading = true);
     try {
-      if (_logoFile != null) {
-        final ref = FirebaseStorage.instance.ref('clinic_logos/${widget.clinicId}/logo.jpg');
-        await ref.putFile(_logoFile!);
-        _logoUrl = await ref.getDownloadURL();
+      final imgMeta = SettableMetadata(contentType: 'image/jpeg');
+      if (_dentistPhotoFile != null) {
+        final ref = FirebaseStorage.instance.ref('dentist_photos/${widget.clinicId}/photo.jpg');
+        await ref.putFile(_dentistPhotoFile!, imgMeta);
+        _dentistPhotoUrl = await ref.getDownloadURL();
       }
 
       final uploadedUrls = <String>[];
       for (final file in _newPhotos) {
         final ref = FirebaseStorage.instance
             .ref('clinic_photos/${widget.clinicId}/${DateTime.now().millisecondsSinceEpoch}.jpg');
-        await ref.putFile(file);
+        await ref.putFile(file, imgMeta);
         uploadedUrls.add(await ref.getDownloadURL());
       }
       final allPhotos = [..._existingPhotos, ...uploadedUrls];
@@ -123,7 +139,7 @@ class _DentistEditProfileScreenState extends State<DentistEditProfileScreen> {
         'treatments': treatments,
         'workingHours': workingHours,
         'photos': allPhotos,
-        if (_logoUrl != null) 'logoUrl': _logoUrl,
+        'dentistPhotoUrl': _dentistPhotoUrl,
       });
 
       if (mounted) {
@@ -161,30 +177,58 @@ class _DentistEditProfileScreenState extends State<DentistEditProfileScreen> {
         padding: const EdgeInsets.all(20),
         children: [
           _Section(
-            title: 'Klinik Logosu',
-            child: GestureDetector(
-              onTap: _pickLogo,
-              child: Center(
-                child: Container(
-                  width: 100, height: 100,
-                  decoration: BoxDecoration(
-                    color: AppColors.primary.withValues(alpha: 0.08),
-                    shape: BoxShape.circle,
-                    border: Border.all(color: AppColors.primary.withValues(alpha: 0.3), width: 2),
+            title: 'Profil Fotoğrafı',
+            child: Center(
+              child: Stack(
+                children: [
+                  GestureDetector(
+                    onTap: _pickDentistPhoto,
+                    child: Container(
+                      width: 100, height: 100,
+                      decoration: BoxDecoration(
+                        color: AppColors.primary.withValues(alpha: 0.08),
+                        shape: BoxShape.circle,
+                        border: Border.all(color: AppColors.primary.withValues(alpha: 0.3), width: 2),
+                      ),
+                      child: _dentistPhotoFile != null
+                          ? ClipOval(child: Image.file(_dentistPhotoFile!, fit: BoxFit.cover, width: 100, height: 100))
+                          : (_dentistPhotoUrl != null && _dentistPhotoUrl!.isNotEmpty)
+                              ? ClipOval(child: Image.network(_dentistPhotoUrl!, fit: BoxFit.cover, width: 100, height: 100))
+                              : const Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Icon(Icons.person_add_outlined, color: AppColors.primary, size: 28),
+                                    SizedBox(height: 4),
+                                    Text('Fotoğraf Ekle', style: TextStyle(color: AppColors.primary, fontSize: 11)),
+                                  ],
+                                ),
+                    ),
                   ),
-                  child: _logoFile != null
-                      ? ClipOval(child: Image.file(_logoFile!, fit: BoxFit.cover, width: 100, height: 100))
-                      : (_logoUrl != null && _logoUrl!.isNotEmpty)
-                          ? ClipOval(child: Image.network(_logoUrl!, fit: BoxFit.cover, width: 100, height: 100))
-                          : const Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Icon(Icons.add_a_photo_outlined, color: AppColors.primary, size: 28),
-                                SizedBox(height: 4),
-                                Text('Logo Ekle', style: TextStyle(color: AppColors.primary, fontSize: 11)),
-                              ],
-                            ),
-                ),
+                  if (_dentistPhotoFile != null)
+                    Positioned(
+                      top: 0, right: 0,
+                      child: GestureDetector(
+                        onTap: () => setState(() => _dentistPhotoFile = null),
+                        child: Container(
+                          width: 22, height: 22,
+                          decoration: const BoxDecoration(color: Colors.red, shape: BoxShape.circle),
+                          child: const Icon(Icons.close, color: Colors.white, size: 14),
+                        ),
+                      ),
+                    ),
+                  if (_dentistPhotoFile == null && _dentistPhotoUrl != null && _dentistPhotoUrl!.isNotEmpty)
+                    Positioned(
+                      top: 0, right: 0,
+                      child: GestureDetector(
+                        onTap: () => setState(() => _dentistPhotoUrl = null),
+                        child: Container(
+                          width: 22, height: 22,
+                          decoration: const BoxDecoration(color: Colors.red, shape: BoxShape.circle),
+                          child: const Icon(Icons.close, color: Colors.white, size: 14),
+                        ),
+                      ),
+                    ),
+                ],
               ),
             ),
           ),

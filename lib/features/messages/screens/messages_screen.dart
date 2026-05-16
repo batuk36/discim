@@ -52,7 +52,41 @@ class MessagesScreen extends StatelessWidget {
             itemBuilder: (_, i) {
               final chat = chats[i];
               final unread = _isUnread(chat);
-              return ListTile(
+              return Dismissible(
+                key: Key(chat.id),
+                direction: DismissDirection.endToStart,
+                background: Container(
+                  alignment: Alignment.centerRight,
+                  padding: const EdgeInsets.only(right: 20),
+                  color: AppColors.error,
+                  child: const Icon(Icons.delete_outline_rounded, color: Colors.white),
+                ),
+                confirmDismiss: (_) async {
+                  return await showDialog<bool>(
+                    context: context,
+                    builder: (dlgCtx) => AlertDialog(
+                      title: const Text('Sohbeti Sil'),
+                      content: Text('${chat.clinicName} ile olan sohbet silinecek.'),
+                      actions: [
+                        TextButton(onPressed: () => Navigator.pop(dlgCtx, false), child: const Text('İptal')),
+                        TextButton(
+                          onPressed: () => Navigator.pop(dlgCtx, true),
+                          style: TextButton.styleFrom(foregroundColor: AppColors.error),
+                          child: const Text('Sil'),
+                        ),
+                      ],
+                    ),
+                  );
+                },
+                onDismissed: (_) async {
+                  final db = FirebaseFirestore.instance;
+                  final msgSnap = await db.collection('chats').doc(chat.id).collection('messages').get();
+                  for (final m in msgSnap.docs) {
+                    await m.reference.delete();
+                  }
+                  await db.collection('chats').doc(chat.id).delete();
+                },
+                child: ListTile(
                 contentPadding: const EdgeInsets.symmetric(vertical: 8),
                 leading: CircleAvatar(
                   backgroundColor: AppColors.primary.withValues(alpha: 0.1),
@@ -96,6 +130,7 @@ class MessagesScreen extends StatelessWidget {
                 onTap: () => Navigator.push(context, MaterialPageRoute(
                   builder: (_) => ChatScreen(chatId: chat.id, clinicName: chat.clinicName),
                 )),
+              ),
               );
             },
           ));

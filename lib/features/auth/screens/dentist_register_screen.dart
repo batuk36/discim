@@ -57,8 +57,25 @@ class _DentistRegisterScreenState extends State<DentistRegisterScreen> {
         'rating': 0.0,
         'reviewCount': 0,
         'isVerified': false,
+        'isApproved': false,
         'subscriptionStatus': 'active',
         'ownerId': cred.user!.uid,
+      });
+      // Firebase Extensions "Trigger Email from Firestore" ile email gönder
+      // Firebase Console > Extensions > "Trigger Email from Firestore" kurulumu gerekli
+      await FirebaseFirestore.instance.collection('mail').add({
+        'to': 'destekdiscim@gmail.com',
+        'message': {
+          'subject': 'Yeni Klinik Onay Bekliyor - ${_clinicCtrl.text.trim()}',
+          'text':
+              'Yeni bir klinik kaydı onay bekliyor.\n\n'
+              'Klinik: ${_clinicCtrl.text.trim()}\n'
+              'Adres: ${_addressCtrl.text.trim()}\n'
+              'Telefon: ${_phoneCtrl.text.trim()}\n'
+              'Email: ${_emailCtrl.text.trim()}\n\n'
+              'Onaylamak için Firebase Console > clinics koleksiyonunda '
+              'ilgili klinik belgesinde isApproved alanını true yapın.',
+        },
       });
       if (mounted) context.go('/dentist');
     } on FirebaseAuthException catch (e) {

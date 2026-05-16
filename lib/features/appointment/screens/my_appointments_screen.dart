@@ -50,6 +50,26 @@ class _MyAppointmentsScreenState extends State<MyAppointmentsScreen> {
     }
   }
 
+  Future<void> _deleteAppointment(BuildContext context, String docId) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dlgCtx) => AlertDialog(
+        title: const Text('Randevuyu Sil'),
+        content: const Text('Bu randevu kaydı silinecek. Devam etmek istiyor musunuz?'),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(dlgCtx, false), child: const Text('İptal')),
+          TextButton(
+            onPressed: () => Navigator.pop(dlgCtx, true),
+            style: TextButton.styleFrom(foregroundColor: AppColors.error),
+            child: const Text('Sil'),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true) return;
+    await FirebaseFirestore.instance.collection('appointments').doc(docId).delete();
+  }
+
   Future<void> _cancelAppointment(BuildContext context, AppointmentModel a) async {
     final confirmed = await showDialog<bool>(
       context: context,
@@ -138,6 +158,7 @@ class _MyAppointmentsScreenState extends State<MyAppointmentsScreen> {
                 final isPast = a.date.isBefore(now);
                 final canReview = isPast && a.status == AppointmentStatus.confirmed;
                 final canCancel = !isPast && a.status != AppointmentStatus.cancelled;
+                final canDelete = a.status == AppointmentStatus.cancelled || isPast;
                 return Card(
                   margin: const EdgeInsets.only(bottom: 12),
                   elevation: 0,
@@ -192,7 +213,7 @@ class _MyAppointmentsScreenState extends State<MyAppointmentsScreen> {
                                 style: const TextStyle(color: AppColors.textGrey, fontSize: 13)),
                           ],
                         ),
-                        if (canCancel || canReview) ...[
+                        if (canCancel || canReview || canDelete) ...[
                           const SizedBox(height: 12),
                           Row(
                             mainAxisAlignment: MainAxisAlignment.end,
@@ -224,6 +245,15 @@ class _MyAppointmentsScreenState extends State<MyAppointmentsScreen> {
                                     foregroundColor: AppColors.error,
                                     padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                                   ),
+                                ),
+                              if (canDelete)
+                                IconButton(
+                                  onPressed: () => _deleteAppointment(context, docs[i].id),
+                                  icon: const Icon(Icons.delete_outline_rounded, size: 18),
+                                  color: AppColors.textGrey,
+                                  tooltip: 'Sil',
+                                  padding: const EdgeInsets.all(6),
+                                  constraints: const BoxConstraints(),
                                 ),
                             ],
                           ),

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/widgets/favorite_button.dart';
 import '../../../core/utils/time_utils.dart';
@@ -11,8 +12,12 @@ class ClinicCard extends StatelessWidget {
 
   const ClinicCard({super.key, required this.clinic, required this.onTap, this.distanceKm});
 
+  static const double _avatarRadius = 44;
+
   @override
   Widget build(BuildContext context) {
+    final hasDentistPhoto = clinic.dentistPhotoUrl != null && clinic.dentistPhotoUrl!.isNotEmpty;
+
     return GestureDetector(
       onTap: onTap,
       child: Container(
@@ -32,16 +37,18 @@ class ClinicCard extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Stack(
+              clipBehavior: Clip.none,
               children: [
                 ClipRRect(
                   borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
                   child: clinic.photos.isNotEmpty
-                      ? Image.network(
-                          clinic.photos.first,
-                          height: 160,
+                      ? CachedNetworkImage(
+                          imageUrl: clinic.photos.first,
+                          height: 300,
                           width: double.infinity,
                           fit: BoxFit.cover,
-                          errorBuilder: (_, __, ___) => _photoPlaceholder(),
+                          placeholder: (_, __) => _photoPlaceholder(),
+                          errorWidget: (_, __, ___) => _photoPlaceholder(),
                         )
                       : _photoPlaceholder(),
                 ),
@@ -80,7 +87,8 @@ class ClinicCard extends StatelessWidget {
                               mainAxisSize: MainAxisSize.min,
                               children: [
                                 Container(
-                                  width: 6, height: 6,
+                                  width: 6,
+                                  height: 6,
                                   decoration: BoxDecoration(
                                     color: open ? Colors.white : Colors.white54,
                                     shape: BoxShape.circle,
@@ -126,10 +134,33 @@ class ClinicCard extends StatelessWidget {
                     ],
                   ),
                 ),
+                if (hasDentistPhoto)
+                  Positioned(
+                    bottom: -_avatarRadius,
+                    left: 14,
+                    child: Container(
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        border: Border.all(color: AppColors.surface, width: 3),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withValues(alpha: 0.15),
+                            blurRadius: 8,
+                            offset: const Offset(0, 2),
+                          ),
+                        ],
+                      ),
+                      child: CircleAvatar(
+                        radius: _avatarRadius,
+                        backgroundColor: AppColors.primary.withValues(alpha: 0.1),
+                        backgroundImage: CachedNetworkImageProvider(clinic.dentistPhotoUrl!),
+                      ),
+                    ),
+                  ),
               ],
             ),
             Padding(
-              padding: const EdgeInsets.all(14),
+              padding: EdgeInsets.fromLTRB(14, hasDentistPhoto ? _avatarRadius + 10 : 14, 14, 14),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -201,7 +232,7 @@ class ClinicCard extends StatelessWidget {
 
   Widget _photoPlaceholder() {
     return Container(
-      height: 160,
+      height: 300,
       width: double.infinity,
       decoration: BoxDecoration(
         gradient: LinearGradient(

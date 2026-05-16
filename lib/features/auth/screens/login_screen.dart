@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart' hide AuthProvider;
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import '../providers/auth_provider.dart';
 import '../../../core/constants/app_colors.dart';
+import 'forgot_password_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -25,44 +25,14 @@ class _LoginScreenState extends State<LoginScreen> {
     super.dispose();
   }
 
-  Future<void> _forgotPassword() async {
-    final ctrl = TextEditingController(text: _emailCtrl.text.trim());
-    final email = await showDialog<String>(
-      context: context,
-      builder: (_) => AlertDialog(
-        title: const Text('Şifre Sıfırla'),
-        content: TextField(
-          controller: ctrl,
-          keyboardType: TextInputType.emailAddress,
-          decoration: const InputDecoration(
-            labelText: 'E-posta adresiniz',
-            prefixIcon: Icon(Icons.email_outlined),
-          ),
-        ),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(context), child: const Text('İptal')),
-          TextButton(
-            onPressed: () => Navigator.pop(context, ctrl.text.trim()),
-            child: const Text('Gönder'),
-          ),
-        ],
+  void _forgotPassword() {
+    FocusManager.instance.primaryFocus?.unfocus();
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => ForgotPasswordScreen(initialEmail: _emailCtrl.text.trim()),
       ),
     );
-    if (email == null || email.isEmpty) return;
-    try {
-      await FirebaseAuth.instance.sendPasswordResetEmail(email: email);
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Şifre sıfırlama e-postası gönderildi')),
-        );
-      }
-    } on FirebaseAuthException catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(e.message ?? 'Hata oluştu')),
-        );
-      }
-    }
   }
 
   Future<void> _submit() async {
@@ -84,7 +54,7 @@ class _LoginScreenState extends State<LoginScreen> {
       body: Stack(
         children: [
           Container(
-            height: MediaQuery.of(context).size.height * 0.38,
+            height: MediaQuery.sizeOf(context).height * 0.38,
             decoration: const BoxDecoration(
               gradient: LinearGradient(
                 begin: Alignment.topLeft,

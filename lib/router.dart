@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'features/auth/providers/auth_provider.dart';
+import 'features/auth/screens/splash_screen.dart';
 import 'features/auth/screens/login_screen.dart';
 import 'features/auth/screens/register_screen.dart';
 import 'features/home/screens/home_screen.dart';
@@ -17,13 +18,24 @@ GoRouter createRouter(BuildContext context) {
   final authProvider = Provider.of<AuthProvider>(context, listen: false);
 
   return GoRouter(
-    initialLocation: '/login',
+    initialLocation: '/splash',
     redirect: (context, state) {
-      if (!authProvider.initialized) return null;
+      final isSplash = state.matchedLocation == '/splash';
+
+      if (!authProvider.initialized) {
+        return isSplash ? null : '/splash';
+      }
+
+      if (isSplash) {
+        return authProvider.isLoggedIn
+            ? (authProvider.role == AuthRole.dentist ? '/dentist' : '/home')
+            : '/login';
+      }
 
       final isLoggedIn = authProvider.isLoggedIn;
-      final isAuthRoute =
-          state.matchedLocation == '/login' || state.matchedLocation == '/register' || state.matchedLocation == '/dentist-register';
+      final isAuthRoute = state.matchedLocation == '/login' ||
+          state.matchedLocation == '/register' ||
+          state.matchedLocation == '/dentist-register';
 
       if (!isLoggedIn && !isAuthRoute) return '/login';
       if (isLoggedIn && isAuthRoute) {
@@ -33,6 +45,7 @@ GoRouter createRouter(BuildContext context) {
     },
     refreshListenable: authProvider,
     routes: [
+      GoRoute(path: '/splash', builder: (_, __) => const SplashScreen()),
       GoRoute(path: '/login', builder: (_, __) => const LoginScreen()),
       GoRoute(path: '/register', builder: (_, __) => const RegisterScreen()),
       GoRoute(path: '/home', builder: (_, __) => const HomeScreen()),

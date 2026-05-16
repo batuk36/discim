@@ -18,6 +18,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   late final TextEditingController _nameCtrl;
   late final TextEditingController _phoneCtrl;
   File? _pickedImage;
+  bool _deletePhoto = false;
   bool _loading = false;
 
   @override
@@ -38,7 +39,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   Future<void> _pickPhoto() async {
     final picker = ImagePicker();
     final picked = await picker.pickImage(source: ImageSource.gallery, imageQuality: 70, maxWidth: 512);
-    if (picked != null) setState(() => _pickedImage = File(picked.path));
+    if (picked != null) setState(() { _pickedImage = File(picked.path); _deletePhoto = false; });
   }
 
   Future<void> _save() async {
@@ -47,33 +48,52 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     final auth = context.read<AuthProvider>();
     final uid = auth.firebaseUser!.uid;
 
-    String? photoUrl = auth.userModel?.photoUrl;
+    try {
+      String? photoUrl = auth.userModel?.photoUrl;
+      final ref = FirebaseStorage.instance.ref('profile_photos/$uid/photo.jpg');
 
-    if (_pickedImage != null) {
-      final ref = FirebaseStorage.instance.ref('profile_images/$uid.jpg');
-      await ref.putFile(_pickedImage!);
-      photoUrl = await ref.getDownloadURL();
-    }
+      if (_deletePhoto) {
+        try { await ref.delete(); } catch (_) {}
+        await FirebaseFirestore.instance.collection('users').doc(uid).update({
+          'name': _nameCtrl.text.trim(),
+          'phone': _phoneCtrl.text.trim(),
+          'photoUrl': FieldValue.delete(),
+        });
+      } else {
+        if (_pickedImage != null) {
+          await ref.putFile(_pickedImage!, SettableMetadata(contentType: 'image/jpeg'));
+          photoUrl = await ref.getDownloadURL();
+        }
+        await FirebaseFirestore.instance.collection('users').doc(uid).update({
+          'name': _nameCtrl.text.trim(),
+          'phone': _phoneCtrl.text.trim(),
+          if (photoUrl != null) 'photoUrl': photoUrl,
+        });
+      }
 
-    await FirebaseFirestore.instance.collection('users').doc(uid).update({
-      'name': _nameCtrl.text.trim(),
-      'phone': _phoneCtrl.text.trim(),
-      if (photoUrl != null) 'photoUrl': photoUrl,
-    });
-
-    await auth.reloadUser();
-    setState(() => _loading = false);
-    if (mounted) {
-      Navigator.pop(context);
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Profil güncellendi'), backgroundColor: AppColors.success),
-      );
+      await auth.reloadUser();
+      if (mounted) {
+        Navigator.pop(context);
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Profil güncellendi'), backgroundColor: AppColors.success),
+        );
+      }
+    } catch (_) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Hata oluştu, tekrar deneyin'), backgroundColor: AppColors.error),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _loading = false);
     }
   }
 
   @override
   Widget build(BuildContext context) {
     final user = context.read<AuthProvider>().userModel;
+    final hasPhoto = !_deletePhoto && (_pickedImage != null || user?.photoUrl != null);
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Bilgilerimi Düzenle'),
@@ -90,23 +110,28 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
         padding: const EdgeInsets.all(24),
         children: [
           Center(
-            child: GestureDetector(
-              onTap: _pickPhoto,
-              child: Stack(
-                children: [
-                  CircleAvatar(
+            child: Stack(
+              children: [
+                GestureDetector(
+                  onTap: _pickPhoto,
+                  child: CircleAvatar(
                     radius: 54,
                     backgroundColor: AppColors.primary.withValues(alpha: 0.1),
-                    backgroundImage: _pickedImage != null
-                        ? FileImage(_pickedImage!)
-                        : (user?.photoUrl != null ? NetworkImage(user!.photoUrl!) as ImageProvider : null),
-                    child: (_pickedImage == null && user?.photoUrl == null)
+                    backgroundImage: _deletePhoto
+                        ? null
+                        : (_pickedImage != null
+                            ? FileImage(_pickedImage!) as ImageProvider
+                            : (user?.photoUrl != null ? NetworkImage(user!.photoUrl!) : null)),
+                    child: !hasPhoto
                         ? const Icon(Icons.person, size: 54, color: AppColors.primary)
                         : null,
                   ),
-                  Positioned(
-                    bottom: 0,
-                    right: 0,
+                ),
+                Positioned(
+                  bottom: 0,
+                  right: 0,
+                  child: GestureDetector(
+                    onTap: _pickPhoto,
                     child: Container(
                       width: 32,
                       height: 32,
@@ -118,13 +143,34 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                       child: const Icon(Icons.camera_alt_rounded, color: Colors.white, size: 16),
                     ),
                   ),
-                ],
-              ),
+                ),
+                if (hasPhoto)
+                  Positioned(
+                    top: 0,
+                    right: 0,
+                    child: GestureDetector(
+                      onTap: () => setState(() { _deletePhoto = true; _pickedImage = null; }),
+                      child: Container(
+                        width: 26,
+                        height: 26,
+                        decoration: BoxDecoration(
+                          color: AppColors.error,
+                          shape: BoxShape.circle,
+                          border: Border.all(color: Colors.white, width: 2),
+                        ),
+                        child: const Icon(Icons.close, color: Colors.white, size: 14),
+                      ),
+                    ),
+                  ),
+              ],
             ),
           ),
           const SizedBox(height: 8),
-          const Center(
-            child: Text('Fotoğrafı değiştir', style: TextStyle(color: AppColors.primary, fontSize: 13)),
+          Center(
+            child: Text(
+              hasPhoto ? 'Fotoğrafı değiştir' : 'Fotoğraf ekle',
+              style: const TextStyle(color: AppColors.primary, fontSize: 13),
+            ),
           ),
           const SizedBox(height: 32),
           TextField(

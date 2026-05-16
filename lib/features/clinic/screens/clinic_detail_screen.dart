@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
@@ -12,6 +13,52 @@ import '../../messages/screens/chat_screen.dart';
 import 'add_review_screen.dart';
 import '../../../core/widgets/favorite_button.dart';
 import '../../../core/utils/time_utils.dart';
+
+class _PhotoViewerScreen extends StatefulWidget {
+  final List<String> photos;
+  final int initialIndex;
+  const _PhotoViewerScreen({required this.photos, required this.initialIndex});
+
+  @override
+  State<_PhotoViewerScreen> createState() => _PhotoViewerScreenState();
+}
+
+class _PhotoViewerScreenState extends State<_PhotoViewerScreen> {
+  late int _current;
+
+  @override
+  void initState() {
+    super.initState();
+    _current = widget.initialIndex;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors.black,
+      appBar: AppBar(
+        backgroundColor: Colors.black,
+        foregroundColor: Colors.white,
+        title: Text('${_current + 1} / ${widget.photos.length}'),
+      ),
+      body: PageView.builder(
+        controller: PageController(initialPage: widget.initialIndex),
+        itemCount: widget.photos.length,
+        onPageChanged: (i) => setState(() => _current = i),
+        itemBuilder: (_, i) => InteractiveViewer(
+          child: Center(
+            child: CachedNetworkImage(
+              imageUrl: widget.photos[i],
+              fit: BoxFit.contain,
+              placeholder: (_, __) => const Center(child: CircularProgressIndicator(color: Colors.white)),
+              errorWidget: (_, __, ___) => const Icon(Icons.broken_image, color: Colors.white54, size: 64),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
 
 class ClinicDetailScreen extends StatefulWidget {
   final String clinicId;
@@ -76,6 +123,12 @@ class _ClinicDetailScreenState extends State<ClinicDetailScreen> {
     ));
   }
 
+  void _openPhotoViewer(BuildContext context, List<String> photos, int initialIndex) {
+    Navigator.push(context, MaterialPageRoute(
+      builder: (_) => _PhotoViewerScreen(photos: photos, initialIndex: initialIndex),
+    ));
+  }
+
   Future<void> _startChat(BuildContext context, String clinicId) async {
     final uid = context.read<AuthProvider>().firebaseUser!.uid;
     final db = FirebaseFirestore.instance;
@@ -136,9 +189,18 @@ class _ClinicDetailScreenState extends State<ClinicDetailScreen> {
                 actions: [
                   IconButton(
                     icon: const Icon(Icons.share_rounded, color: Colors.white),
-                    onPressed: () => Share.share(
-                      'Dişçim uygulamasında ${clinic.name} kliniğini inceleyin!\n${clinic.address}',
-                    ),
+                    onPressed: () {
+                      final parts = <String>[
+                        '🦷 ${clinic.name}',
+                        if (clinic.address.isNotEmpty) '📍 ${clinic.address}',
+                        if (clinic.phone.isNotEmpty) '📞 ${clinic.phone}',
+                        if (clinic.rating > 0) '⭐ ${clinic.rating.toStringAsFixed(1)} (${clinic.reviewCount} yorum)',
+                        if (clinic.lat != 0 && clinic.lng != 0)
+                          '🗺️ https://maps.google.com/?q=${clinic.lat},${clinic.lng}',
+                        '\nDişçim uygulamasından paylaşıldı.',
+                      ];
+                      Share.share(parts.join('\n'));
+                    },
                   ),
                   FavoriteButton(clinicId: widget.clinicId, light: true),
                 ],
@@ -153,7 +215,15 @@ class _ClinicDetailScreenState extends State<ClinicDetailScreen> {
                               controller: _photoPageCtrl,
                               itemCount: clinic.photos.length,
                               onPageChanged: (i) => setState(() => _photoIndex = i),
-                              itemBuilder: (_, i) => Image.network(clinic.photos[i], fit: BoxFit.cover),
+                              itemBuilder: (_, i) => GestureDetector(
+                                onTap: () => _openPhotoViewer(context, clinic.photos, i),
+                                child: CachedNetworkImage(
+                                  imageUrl: clinic.photos[i],
+                                  fit: BoxFit.cover,
+                                  placeholder: (_, __) => Container(color: AppColors.primary.withValues(alpha: 0.1)),
+                                  errorWidget: (_, __, ___) => Container(color: AppColors.primary.withValues(alpha: 0.1)),
+                                ),
+                              ),
                             ),
                             if (clinic.photos.length > 1) ...[
                               Positioned(

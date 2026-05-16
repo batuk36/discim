@@ -34,9 +34,13 @@ class _DentistHomeScreenState extends State<DentistHomeScreen> {
         final clinicDoc  = clinicSnap.data?.docs.firstOrNull;
         final clinicId   = clinicDoc?.id ?? '';
         final clinicData = clinicDoc?.data() as Map<String, dynamic>?;
-        final clinicName = clinicData?['name'] as String? ?? '';
-        final logoUrl    = clinicData?['logoUrl'] as String?;
+        final clinicName      = clinicData?['name'] as String? ?? '';
+        final dentistPhotoUrl = clinicData?['dentistPhotoUrl'] as String?;
+        final isApproved      = clinicData?['isApproved'] as bool? ?? true;
 
+        if (clinicSnap.connectionState != ConnectionState.waiting && clinicData != null && !isApproved) {
+          return const _PendingApprovalScreen();
+        }
 
         return StreamBuilder<QuerySnapshot>(
           stream: clinicId.isNotEmpty
@@ -63,7 +67,7 @@ class _DentistHomeScreenState extends State<DentistHomeScreen> {
                     onNavigate: (i) => setState(() => _currentIndex = i),
                     clinicName: clinicName,
                     clinicId: clinicId,
-                    logoUrl: logoUrl,
+                    dentistPhotoUrl: dentistPhotoUrl,
                   ),
                   const _DentistAppointments(),
                   const DentistMessagesScreen(),
@@ -87,8 +91,8 @@ class _DentistDashboard extends StatelessWidget {
   final ValueChanged<int> onNavigate;
   final String clinicName;
   final String clinicId;
-  final String? logoUrl;
-  const _DentistDashboard({required this.onNavigate, required this.clinicName, required this.clinicId, this.logoUrl});
+  final String? dentistPhotoUrl;
+  const _DentistDashboard({required this.onNavigate, required this.clinicName, required this.clinicId, this.dentistPhotoUrl});
 
   @override
   Widget build(BuildContext context) {
@@ -117,8 +121,8 @@ class _DentistDashboard extends StatelessWidget {
                         shape: BoxShape.circle,
                         border: Border.all(color: Colors.white30, width: 1.5),
                       ),
-                      child: (logoUrl != null && logoUrl!.isNotEmpty)
-                          ? ClipOval(child: Image.network(logoUrl!, fit: BoxFit.cover, width: 46, height: 46))
+                      child: (dentistPhotoUrl != null && dentistPhotoUrl!.isNotEmpty)
+                          ? ClipOval(child: Image.network(dentistPhotoUrl!, fit: BoxFit.cover, width: 46, height: 46))
                           : const Icon(Icons.medical_services_rounded, color: Colors.white, size: 22),
                     ),
                     const SizedBox(width: 12),
@@ -703,9 +707,15 @@ class _DentistProfile extends StatelessWidget {
             children: [
               Center(
                 child: Container(
-                  width: 80, height: 80,
-                  decoration: BoxDecoration(color: AppColors.primary.withValues(alpha: 0.1), shape: BoxShape.circle),
-                  child: const Icon(Icons.medical_services_rounded, color: AppColors.primary, size: 36),
+                  width: 90, height: 90,
+                  decoration: BoxDecoration(
+                    color: AppColors.primary.withValues(alpha: 0.1),
+                    shape: BoxShape.circle,
+                    border: Border.all(color: AppColors.primary.withValues(alpha: 0.2), width: 2),
+                  ),
+                  child: (clinic.dentistPhotoUrl != null && clinic.dentistPhotoUrl!.isNotEmpty)
+                      ? ClipOval(child: Image.network(clinic.dentistPhotoUrl!, fit: BoxFit.cover, width: 90, height: 90))
+                      : const Icon(Icons.medical_services_rounded, color: AppColors.primary, size: 36),
                 ),
               ),
               const SizedBox(height: 12),
@@ -823,3 +833,74 @@ class _InfoTile extends StatelessWidget {
     );
   }
 }
+
+class _PendingApprovalScreen extends StatelessWidget {
+  const _PendingApprovalScreen();
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: Container(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [Color(0xFF005F6B), Color(0xFF00BCD4)],
+          ),
+        ),
+        child: SafeArea(
+          child: Center(
+            child: Padding(
+              padding: const EdgeInsets.all(32),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Container(
+                    width: 100, height: 100,
+                    decoration: BoxDecoration(
+                      color: Colors.white.withValues(alpha: 0.15),
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(Icons.hourglass_top_rounded, color: Colors.white, size: 48),
+                  ),
+                  const SizedBox(height: 32),
+                  const Text(
+                    'Kliniğiniz İnceleniyor',
+                    style: TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.w800),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 16),
+                  const Text(
+                    'Kayıt talebiniz alındı. Ekibimiz kliniğinizi inceleyecek ve en kısa sürede onaylayacaktır.',
+                    style: TextStyle(color: Colors.white70, fontSize: 15, height: 1.5),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 12),
+                  const Text(
+                    'Onaylandığında sisteme erişebileceksiniz.',
+                    style: TextStyle(color: Colors.white54, fontSize: 13),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 48),
+                  OutlinedButton.icon(
+                    onPressed: () {
+                      context.read<AuthProvider>().signOut();
+                    },
+                    icon: const Icon(Icons.logout_rounded, color: Colors.white70),
+                    label: const Text('Çıkış Yap', style: TextStyle(color: Colors.white70)),
+                    style: OutlinedButton.styleFrom(
+                      side: const BorderSide(color: Colors.white30),
+                      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+

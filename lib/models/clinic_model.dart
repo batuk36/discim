@@ -28,7 +28,8 @@ class ClinicModel {
   final String subscriptionStatus;
   final String ownerId;
   final bool isOnline;
-  final String? logoUrl;
+  final bool isApproved;
+  final String? dentistPhotoUrl;
 
   ClinicModel({
     required this.id,
@@ -48,7 +49,8 @@ class ClinicModel {
     required this.subscriptionStatus,
     required this.ownerId,
     this.isOnline = false,
-    this.logoUrl,
+    this.isApproved = false,
+    this.dentistPhotoUrl,
   });
 
   factory ClinicModel.fromMap(Map<String, dynamic> m, String id) => ClinicModel(
@@ -71,7 +73,8 @@ class ClinicModel {
         subscriptionStatus: m['subscriptionStatus'] ?? 'free',
         ownerId: m['ownerId'] ?? '',
         isOnline: m['isOnline'] ?? false,
-        logoUrl: m['logoUrl'] as String?,
+        isApproved: m['isApproved'] ?? true,
+        dentistPhotoUrl: m['dentistPhotoUrl'] as String?,
       );
 
   Map<String, dynamic> toMap() => {
@@ -91,6 +94,7 @@ class ClinicModel {
         'subscriptionStatus': subscriptionStatus,
         'ownerId': ownerId,
         'isOnline': isOnline,
-        if (logoUrl != null) 'logoUrl': logoUrl,
+        'isApproved': isApproved,
+        if (dentistPhotoUrl != null) 'dentistPhotoUrl': dentistPhotoUrl,
       };
 }
