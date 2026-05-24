@@ -68,5 +68,15 @@
 		</array>
 		<key>UIStatusBarHidden</key>
 		<false/>
+		<key>NSLocationWhenInUseUsageDescription</key>
+		<string>Yakınındaki dişçileri göstermek için konumuna ihtiyacımız var.</string>
+		<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+		<string>Yakınındaki dişçileri göstermek için konumuna ihtiyacımız var.</string>
+		<key>NSCameraUsageDescription</key>
+		<string>Profil fotoğrafı çekmek için kameraya erişim gerekiyor.</string>
+		<key>NSPhotoLibraryUsageDescription</key>
+		<string>Profil fotoğrafı seçmek için galeri erişimi gerekiyor.</string>
+		<key>NSPhotoLibraryAddUsageDescription</key>
+		<string>Fotoğraf kaydetmek için galeri erişimi gerekiyor.</string>
 	</dict>
 </plist>
