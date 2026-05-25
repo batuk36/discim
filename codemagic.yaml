@@ -13,7 +13,7 @@ workflows:
       flutter: stable
 
     scripts:
-      - name: Set up code signing
+      - name: Build iOS IPA
         script: |
           keychain initialize
           app-store-connect fetch-signing-files \
@@ -22,12 +22,7 @@ workflows:
             --create
           keychain add-certificates
           xcode-project use-profiles
-
-      - name: Get Flutter packages
-        script: flutter pub get
-
-      - name: Build iOS IPA
-        script: |
+          flutter pub get
           flutter build ipa --release \
             --export-options-plist=$CM_EXPORT_DIR/ExportOptions.plist
 
