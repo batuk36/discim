@@ -23,18 +23,25 @@ class NotificationService {
   );
 
   static Future<void> init() async {
-    // Permission (Android 13+ + iOS)
-    await _fcm.requestPermission(alert: true, badge: true, sound: true);
+    // Permission (Android 13+ + iOS) — non-critical, hata olursa devam et
+    try {
+      await _fcm.requestPermission(alert: true, badge: true, sound: true);
+    } catch (_) {}
 
     // Create Android notification channel
     await _local
         .resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>()
         ?.createNotificationChannel(_channel);
 
-    // Init flutter_local_notifications
+    // Init flutter_local_notifications (Android + iOS)
     await _local.initialize(
       const InitializationSettings(
         android: AndroidInitializationSettings('@mipmap/ic_launcher'),
+        iOS: DarwinInitializationSettings(
+          requestAlertPermission: false,
+          requestBadgePermission: false,
+          requestSoundPermission: false,
+        ),
       ),
     );
 

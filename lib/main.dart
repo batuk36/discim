@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -14,9 +15,11 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
   FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
-  await NotificationService.init();
   await initializeDateFormatting('tr', null);
   runApp(const DiscimApp());
+  // Notification izni ve init, uygulama başladıktan sonra arka planda yapılır.
+  // Böylece iOS'ta uygulama açılmadan önce izin dialogu gösterilmez.
+  unawaited(NotificationService.init());
 }
 
 class DiscimApp extends StatelessWidget {
