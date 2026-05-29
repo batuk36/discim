@@ -1,6 +1,4 @@
-import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:provider/provider.dart';
 import 'features/auth/providers/auth_provider.dart';
 import 'features/auth/screens/splash_screen.dart';
 import 'features/auth/screens/login_screen.dart';
@@ -14,8 +12,7 @@ import 'features/profile/screens/profile_screen.dart';
 import 'features/auth/screens/dentist_register_screen.dart';
 import 'features/dentist/screens/dentist_home_screen.dart';
 
-GoRouter createRouter(BuildContext context) {
-  final authProvider = Provider.of<AuthProvider>(context, listen: false);
+GoRouter createRouterFromProvider(AuthProvider authProvider) {
 
   return GoRouter(
     initialLocation: '/splash',

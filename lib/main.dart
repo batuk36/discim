@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'core/theme/app_theme.dart';
@@ -22,23 +23,43 @@ void main() async {
   unawaited(NotificationService.init());
 }
 
-class DiscimApp extends StatelessWidget {
+class DiscimApp extends StatefulWidget {
   const DiscimApp({super.key});
+
+  @override
+  State<DiscimApp> createState() => _DiscimAppState();
+}
+
+class _DiscimAppState extends State<DiscimApp> {
+  late final AuthProvider _authProvider;
+  late final GoRouter _router;
+
+  @override
+  void initState() {
+    super.initState();
+    _authProvider = AuthProvider();
+    _router = createRouterFromProvider(_authProvider);
+  }
+
+  @override
+  void dispose() {
+    _authProvider.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
-        ChangeNotifierProvider(create: (_) => AuthProvider()),
+        ChangeNotifierProvider.value(value: _authProvider),
         ChangeNotifierProvider(create: (_) => LocaleProvider()),
       ],
       child: Consumer<LocaleProvider>(
         builder: (context, localeProvider, _) {
-          final router = createRouter(context);
           return MaterialApp.router(
             title: 'Dişçim',
             theme: AppTheme.light,
-            routerConfig: router,
+            routerConfig: _router,
             debugShowCheckedModeBanner: false,
             locale: localeProvider.locale,
             localizationsDelegates: const [
