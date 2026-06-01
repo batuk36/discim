@@ -26,6 +26,17 @@ class AuthProvider extends ChangeNotifier {
   bool get initialized => _initialized;
 
   AuthProvider() {
+    // iPadOS 26 gibi yeni/beta OS'lerde Firebase yavaş kalabilir;
+    // 6 saniyede init olmazsa login'e zorla
+    Future.delayed(const Duration(seconds: 6), () {
+      if (!_initialized) {
+        _userModel = null;
+        _role = AuthRole.none;
+        _initialized = true;
+        notifyListeners();
+      }
+    });
+
     _auth.authStateChanges().listen((user) async {
       _initialized = false;
       if (user != null) {
@@ -40,23 +51,32 @@ class AuthProvider extends ChangeNotifier {
   }
 
   Future<void> _loadUserData(String uid) async {
-    final userDoc = await _db.collection('users').doc(uid).get();
-    if (userDoc.exists) {
-      _userModel = UserModel.fromMap(userDoc.data()!, uid);
-      _role = AuthRole.user;
-      NotificationService.saveTokenForUser(uid);
-    } else {
-      final clinicDoc = await _db
-          .collection('clinics')
-          .where('ownerId', isEqualTo: uid)
-          .limit(1)
-          .get();
-      if (clinicDoc.docs.isNotEmpty) {
-        _role = AuthRole.dentist;
-        NotificationService.saveTokenForClinic(clinicDoc.docs.first.id);
-      } else {
+    try {
+      final userDoc = await _db
+          .collection('users')
+          .doc(uid)
+          .get()
+          .timeout(const Duration(seconds: 5));
+      if (userDoc.exists) {
+        _userModel = UserModel.fromMap(userDoc.data()!, uid);
         _role = AuthRole.user;
+        NotificationService.saveTokenForUser(uid);
+      } else {
+        final clinicDoc = await _db
+            .collection('clinics')
+            .where('ownerId', isEqualTo: uid)
+            .limit(1)
+            .get()
+            .timeout(const Duration(seconds: 5));
+        if (clinicDoc.docs.isNotEmpty) {
+          _role = AuthRole.dentist;
+          NotificationService.saveTokenForClinic(clinicDoc.docs.first.id);
+        } else {
+          _role = AuthRole.user;
+        }
       }
+    } catch (_) {
+      _role = AuthRole.user;
     }
     _initialized = true;
     notifyListeners();

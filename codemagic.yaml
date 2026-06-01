@@ -34,6 +34,7 @@ workflows:
           ls -la "$CM_EXPORT_DIR" || echo "WARNING: CM_EXPORT_DIR not found"
 
           flutter pub get
+          flutter pub run flutter_launcher_icons:main
 
           if [ -f "$CM_EXPORT_DIR/ExportOptions.plist" ]; then
             echo ">>> Building with generated ExportOptions.plist"
