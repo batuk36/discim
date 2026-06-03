@@ -38,7 +38,6 @@ class AuthProvider extends ChangeNotifier {
     });
 
     _auth.authStateChanges().listen((user) async {
-      _initialized = false;
       if (user != null) {
         await _loadUserData(user.uid);
       } else {
