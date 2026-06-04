@@ -144,6 +144,9 @@ class _ExplorePageState extends State<_ExplorePage> {
   List<String> _searchHistory = [];
   bool _searchFocused = false;
 
+  bool _clinicsLoadTimeout = false;
+  Timer? _clinicsTimer;
+
   // Advanced filters
   final Set<String> _treatmentFilter = {};
   double _minRatingFilter = 0;
@@ -162,6 +165,9 @@ class _ExplorePageState extends State<_ExplorePage> {
   @override
   void initState() {
     super.initState();
+    _clinicsTimer = Timer(const Duration(seconds: 10), () {
+      if (mounted) setState(() => _clinicsLoadTimeout = true);
+    });
     _fetchLocation();
     _loadHistory();
     _searchFocus.addListener(() {
@@ -426,6 +432,7 @@ class _ExplorePageState extends State<_ExplorePage> {
 
   @override
   void dispose() {
+    _clinicsTimer?.cancel();
     _searchCtrl.dispose();
     _searchFocus.dispose();
     super.dispose();
@@ -746,7 +753,7 @@ class _ExplorePageState extends State<_ExplorePage> {
         StreamBuilder<QuerySnapshot>(
           stream: FirebaseFirestore.instance.collection('clinics').snapshots(),
           builder: (context, snap) {
-            if (snap.connectionState == ConnectionState.waiting) {
+            if (!snap.hasData && snap.connectionState == ConnectionState.waiting && !_clinicsLoadTimeout) {
               return const SliverToBoxAdapter(
                 child: Center(child: Padding(
                   padding: EdgeInsets.all(40),
