@@ -26,9 +26,14 @@ class AuthProvider extends ChangeNotifier {
   bool get initialized => _initialized;
 
   AuthProvider() {
-    // iPadOS 26 gibi yeni/beta OS'lerde Firebase yavaş kalabilir;
-    // 6 saniyede init olmazsa login'e zorla
-    Future.delayed(const Duration(seconds: 6), () {
+    // Fresh install veya logged-out durumda currentUser synchronous olarak null döner;
+    // authStateChanges beklemeye gerek yok, splash'i anında geç.
+    if (_auth.currentUser == null) {
+      _initialized = true;
+    }
+
+    // Hard cap: returning user için 3 saniyede init olmazsa login'e zorla
+    Future.delayed(const Duration(seconds: 3), () {
       if (!_initialized) {
         _userModel = null;
         _role = AuthRole.none;
@@ -55,7 +60,7 @@ class AuthProvider extends ChangeNotifier {
           .collection('users')
           .doc(uid)
           .get()
-          .timeout(const Duration(seconds: 5));
+          .timeout(const Duration(seconds: 3));
       if (userDoc.exists) {
         _userModel = UserModel.fromMap(userDoc.data()!, uid);
         _role = AuthRole.user;
@@ -66,7 +71,7 @@ class AuthProvider extends ChangeNotifier {
             .where('ownerId', isEqualTo: uid)
             .limit(1)
             .get()
-            .timeout(const Duration(seconds: 5));
+            .timeout(const Duration(seconds: 3));
         if (clinicDoc.docs.isNotEmpty) {
           _role = AuthRole.dentist;
           NotificationService.saveTokenForClinic(clinicDoc.docs.first.id);
