@@ -18,9 +18,7 @@ void main() async {
   FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
   await initializeDateFormatting('tr', null);
   runApp(const DiscimApp());
-  // Notification izni ve init, uygulama başladıktan sonra arka planda yapılır.
-  // Böylece iOS'ta uygulama açılmadan önce izin dialogu gösterilmez.
-  unawaited(NotificationService.init());
+  unawaited(NotificationService.init().catchError((_) {}));
 }
 
 class DiscimApp extends StatefulWidget {
